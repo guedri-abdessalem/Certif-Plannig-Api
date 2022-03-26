@@ -18,136 +18,136 @@ const TestDateSchema = Joi.object({
 
 const CertifController = {
 
-  retrieveAll: async (request, response) => {
+  retrieveAll: async (req, res) => {
     const certifs = await certifModel.find({}).populate('testDates');
 
     try {
-      response.send(certifs);
+      res.send(certifs);
     } catch (error) {
-      response.status(500).send(error);
+      res.status(500).send(error);
     }
   },
 
-  retrieveOne: async (request, response) => {
+  retrieveOne: async (req, res) => {
 
-    const certif = await certifModel.findById(request.params.certifId);
+    const certif = await certifModel.findById(req.params.certifId);
 
     try {
-      response.send(certif);
+      res.send(certif);
     } catch (error) {
-      response.status(500).send(error);
+      res.status(500).send(error);
     }
   },
 
-  create: async (request, response) => {
-    let certif = await CertifSchema.validateAsync(request.body, { abortEarly: false });
+  create: async (req, res) => {
+    let certif = await CertifSchema.validateAsync(req.body, { abortEarly: false });
     res = await new Certif(certif).save();
-    return response.json(res);
+    return res.json(res);
   },
 
-  deleteCertif: async (request, response) => {
+  deleteCertif: async (req, res) => {
     await userModel.findByIdAndUpdate(
-      request.user._id,
-      { $pull: { selectedCertifs: request.params.certifId } },
+      req.user._id,
+      { $pull: { selectedCertifs: req.params.certifId } },
     );
 
-    await testDateModel.deleteMany({ certif: request.params.certifId });
-    await certifModel.findByIdAndDelete(request.params.certifId);
+    await testDateModel.deleteMany({ certif: req.params.certifId });
+    await certifModel.findByIdAndDelete(req.params.certifId);
 
-    response.status(202).send();
+    res.status(202).send();
   },
 
-  retrieveTestDatesByCertif: async (request, response) => {
+  retrieveTestDatesByCertif: async (req, res) => {
 
-    const certif = await certifModel.findById(request.params.certifId).populate("testDates");
+    const certif = await certifModel.findById(req.params.certifId).populate("testDates");
 
     try {
-      response.send(certif.testDates);
+      res.send(certif.testDates);
     } catch (error) {
-      response.status(500).send(error);
+      res.status(500).send(error);
     }
   },
-  retrieveUsersFromCertif: async (request, response) => {
+  retrieveUsersFromCertif: async (req, res) => {
 
-    const certif = await certifModel.findById(request.params.certifId).populate("selectedBy", "-roles");
+    const certif = await certifModel.findById(req.params.certifId).populate("selectedBy", "-roles");
 
     try {
-      response.send(certif.selectedBy);
+      res.send(certif.selectedBy);
     } catch (error) {
-      response.status(500).send(error);
+      res.status(500).send(error);
     }
   },
 
-  addTestDate: async (request, response) => {
-    let testDate = await TestDateSchema.validateAsync(request.body, { abortEarly: false });
-    testDate.certif = request.params.certifId;
+  addTestDate: async (req, res) => {
+    let testDate = await TestDateSchema.validateAsync(req.body, { abortEarly: false });
+    testDate.certif = req.params.certifId;
     newTestDate = await new testDateModel(testDate).save();
-    const certif = await certifModel.findById(request.params.certifId);
+    const certif = await certifModel.findById(req.params.certifId);
     certif.testDates.push(newTestDate);
     await certif.save();
-    return response.json(newTestDate);
+    return res.json(newTestDate);
   },
 
-  selectCertif: async (request, response) => {
+  selectCertif: async (req, res) => {
 
     let certif = await certifModel.findByIdAndUpdate(
-      request.params.certifId,
-      { $push: { selectedBy: request.user._id } },
+      req.params.certifId,
+      { $push: { selectedBy: req.user._id } },
       { new: true, useFindAndModify: false }
     );
 
     user = await userModel.findByIdAndUpdate(
-      request.user._id,
+      req.user._id,
       { $push: { selectedCertifs: certif._id } },
       { new: true, useFindAndModify: false }
     );
 
-    return response.send(certif);
+    return res.send(certif);
   },
 
-  chooseTestDateTiming: async (request, response) => {
+  chooseTestDateTiming: async (req, res) => {
 
     let testDate = await testDateModel.findByIdAndUpdate(
-      request.params.testDateId,
-      { $push: { subscribedUsers: request.user._id } },
+      req.params.testDateId,
+      { $push: { subscribedUsers: req.user._id } },
       { new: true, useFindAndModify: false }
     );
 
     user = await userModel.findByIdAndUpdate(
-      request.user._id,
+      req.user._id,
       { $push: { testDatesPlanned: testDate._id } },
       { new: true, useFindAndModify: false }
     );
-    return response.send(testDate);
+    return res.send(testDate);
   },
 
-  retrieveTestDateChooser: async (request, response) => {
+  retrieveTestDateChooser: async (req, res) => {
 
-    const testDate = await testDateModel.findById(request.params.testDateId).populate("subscribedUsers");
+    const testDate = await testDateModel.findById(req.params.testDateId).populate("subscribedUsers");
 
     try {
-      response.send(testDate.subscribedUsers);
+      res.send(testDate.subscribedUsers);
     } catch (error) {
       sh
-      response.status(500).send(error);
+      res.status(500).send(error);
     }
   },
 
-  removeTestDate: async (request, response) => {
+  removeTestDate: async (req, res) => {
     await userModel.findByIdAndUpdate(
-      request.user._id,
-      { $pull: { testDatesPlanned: request.params.testDateId } },
+      req.user._id,
+      { $pull: { testDatesPlanned: req.params.testDateId } },
     );
 
     await certifModel.findByIdAndUpdate(
-      request.params.certifId,
-      { $pull: { testDates: request.params.testDateId } },
+      req.params.certifId,
+      { $pull: { testDates: req.params.testDateId } },
     );
 
-    await testDateModel.findByIdAndDelete(request.params.testDateId);
+    await testDateModel.findByIdAndDelete(req.params.testDateId);
 
 
-    response.status(202).send();
+    res.status(202).send();
   }
 
 }
