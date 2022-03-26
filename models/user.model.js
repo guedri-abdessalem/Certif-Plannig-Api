@@ -18,12 +18,14 @@ const UserSchema = new mongoose.Schema(
     },
     hashedPassword: {
       type: String,
-      required: true
+      required: true,
+      select: false
     },
     createdAt: {
       type: Date,
       default: Date.now,
-    },
+    },// Regexp to validate emails with more strict rules as added in tests/users.js which also conforms mostly with RFC2822 guide lines
+
     selectedCertifs: [
       {
         type: mongoose.Schema.Types.ObjectId,

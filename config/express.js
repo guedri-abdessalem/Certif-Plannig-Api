@@ -20,27 +20,6 @@ if (config.env === 'development') {
   app.use(logger('dev'));
 }
 
-// Choose what frontend framework to serve the dist from
-var distDir = '../../dist/';
-if (config.frontend == 'react') {
-  distDir = '../../node_modules/material-dashboard-react/dist';
-} else {
-  distDir = '../../dist/';
-}
-
-//
-app.use(express.static(path.join(__dirname, distDir)));
-app.use(/^((?!(api)).)*/, (req, res) => {
-  res.sendFile(path.join(__dirname, distDir + '/index.html'));
-});
-
-console.log(distDir);
-//React server
-app.use(
-  express.static(
-    path.join(__dirname, '../../node_modules/material-dashboard-react/dist')
-  )
-);
 app.use(/^((?!(api)).)*/, (req, res) => {
   res.sendFile(path.join(__dirname, '../../dist/index.html'));
 });
