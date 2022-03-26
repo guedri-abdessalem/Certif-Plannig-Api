@@ -14,10 +14,10 @@ const CertifSchema = mongoose.Schema(
             type: String,
             required: true,
         },
-        tests: [
+        testDates: [
             {
                 type: mongoose.Schema.Types.ObjectId,
-                ref: "Test"
+                ref: "TestDate"
             }
         ],
         selectedBy: [

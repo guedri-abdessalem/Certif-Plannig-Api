@@ -2,7 +2,7 @@ const bcrypt = require('bcrypt');
 const Joi = require('joi');
 const certifModel = require('../models/certif.model');
 const Certif = require('../models/certif.model');
-const testModel = require('../models/test.model');
+const testDateModel = require('../models/testDate.model');
 const userModel = require('../models/user.model');
 
 const CertifSchema = Joi.object({
@@ -10,7 +10,7 @@ const CertifSchema = Joi.object({
   description: Joi.string().required(),
 });
 
-const TestSchema = Joi.object({
+const TestDateSchema = Joi.object({
   plannedDate: Joi.date().required(),
   duration: Joi.number().required(),
 });
@@ -19,7 +19,7 @@ const TestSchema = Joi.object({
 const CertifController = {
 
   retrieveAll: async (request, response) => {
-    const certifs = await certifModel.find({}).populate('tests');
+    const certifs = await certifModel.find({}).populate('testDates');
 
     try {
       response.send(certifs);
@@ -51,18 +51,18 @@ const CertifController = {
       { $pull: { selectedCertifs: request.params.certifId } },
     );
 
-    await testModel.deleteMany({ certif: request.params.certifId });
+    await testDateModel.deleteMany({ certif: request.params.certifId });
     await certifModel.findByIdAndDelete(request.params.certifId);
 
     response.status(202).send();
   },
 
-  retrieveTestsByCertif: async (request, response) => {
+  retrieveTestDatesByCertif: async (request, response) => {
 
-    const certif = await certifModel.findById(request.params.certifId).populate("tests");
+    const certif = await certifModel.findById(request.params.certifId).populate("testDates");
 
     try {
-      response.send(certif.tests);
+      response.send(certif.testDates);
     } catch (error) {
       response.status(500).send(error);
     }
@@ -78,14 +78,14 @@ const CertifController = {
     }
   },
 
-  addTest: async (request, response) => {
-    let test = await TestSchema.validateAsync(request.body, { abortEarly: false });
-    test.certif = request.params.certifId;
-    newTest = await new testModel(test).save();
+  addTestDate: async (request, response) => {
+    let testDate = await TestDateSchema.validateAsync(request.body, { abortEarly: false });
+    testDate.certif = request.params.certifId;
+    newTestDate = await new testDateModel(testDate).save();
     const certif = await certifModel.findById(request.params.certifId);
-    certif.tests.push(newTest);
+    certif.testDates.push(newTestDate);
     await certif.save();
-    return response.json(newTest);
+    return response.json(newTestDate);
   },
 
   selectCertif: async (request, response) => {
@@ -105,46 +105,46 @@ const CertifController = {
     return response.send(certif);
   },
 
-  chooseTestTiming: async (request, response) => {
+  chooseTestDateTiming: async (request, response) => {
 
-    let test = await testModel.findByIdAndUpdate(
-      request.params.testId,
+    let testDate = await testDateModel.findByIdAndUpdate(
+      request.params.testDateId,
       { $push: { subscribedUsers: request.user._id } },
       { new: true, useFindAndModify: false }
     );
 
     user = await userModel.findByIdAndUpdate(
       request.user._id,
-      { $push: { testsPlanned: test._id } },
+      { $push: { testDatesPlanned: testDate._id } },
       { new: true, useFindAndModify: false }
     );
-    return response.send(test);
+    return response.send(testDate);
   },
 
-  retrieveTestChooser: async (request, response) => {
+  retrieveTestDateChooser: async (request, response) => {
 
-    const test = await testModel.findById(request.params.testId).populate("subscribedUsers");
+    const testDate = await testDateModel.findById(request.params.testDateId).populate("subscribedUsers");
 
     try {
-      response.send(test.subscribedUsers);
+      response.send(testDate.subscribedUsers);
     } catch (error) {
       sh
       response.status(500).send(error);
     }
   },
 
-  removeTest: async (request, response) => {
+  removeTestDate: async (request, response) => {
     await userModel.findByIdAndUpdate(
       request.user._id,
-      { $pull: { testsPlanned: request.params.testId } },
+      { $pull: { testDatesPlanned: request.params.testDateId } },
     );
 
     await certifModel.findByIdAndUpdate(
       request.params.certifId,
-      { $pull: { tests: request.params.testId } },
+      { $pull: { testDates: request.params.testDateId } },
     );
 
-    await testModel.findByIdAndDelete(request.params.testId);
+    await testDateModel.findByIdAndDelete(request.params.testDateId);
 
 
     response.status(202).send();

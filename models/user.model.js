@@ -32,10 +32,10 @@ const UserSchema = new mongoose.Schema(
         ref: "Certif"
       }
     ],
-    testsPlanned: [
+    testDatesPlanned: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Test"
+        ref: "TestDate"
       }
     ],
     roles: [

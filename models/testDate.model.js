@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 
-const TestSchema = mongoose.Schema(
+const TestDateSchema = mongoose.Schema(
     {
         plannedDate: {
             type: Date,
@@ -24,4 +24,4 @@ const TestSchema = mongoose.Schema(
     }
 );
 
-module.exports = mongoose.model('Test', TestSchema);
+module.exports = mongoose.model('TestDate', TestDateSchema);
