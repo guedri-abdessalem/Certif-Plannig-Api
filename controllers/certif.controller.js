@@ -41,8 +41,8 @@ const CertifController = {
 
   create: async (req, res) => {
     let certif = await CertifSchema.validateAsync(req.body, { abortEarly: false });
-    res = await new Certif(certif).save();
-    return res.json(res);
+    cert = await new Certif(certif).save();
+    return res.json(cert);
   },
 
   deleteCertif: async (req, res) => {
@@ -105,7 +105,7 @@ const CertifController = {
     return res.send(certif);
   },
 
-  chooseTestDateTiming: async (req, res) => {
+  chooseTestDate: async (req, res) => {
 
     let testDate = await testDateModel.findByIdAndUpdate(
       req.params.testDateId,

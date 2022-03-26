@@ -14,13 +14,14 @@ router.use(passport.authenticate('jwt', { session: false }));
 router.route('/').post(requireAdmin, asyncHandler(CertifController.create));
 router.route('/:certifId').delete(requireAdmin,
     asyncHandler(CertifController.deleteCertif));
+router.route('/:certifId/testDate').post(requireAdmin,
+    asyncHandler(CertifController.addTestDate));
 router.route('/:certifId/users').get(requireAdmin,
     asyncHandler(CertifController.retrieveUsersFromCertif));
-router.route('/:certifId/testDate').post(asyncHandler(requireAdmin,
-    CertifController.addTestDate));
-router.route('/:certifId/testDate/:testDateId').get(asyncHandler(requireAdmin,
+
+router.route('/:certifId/testDate/:testDateId').get(requireAdmin, asyncHandler(
     CertifController.retrieveTestDateChooser));
-router.route('/:certifId/testDate/:testDateId').delete(asyncHandler(requireAdmin,
+router.route('/:certifId/testDate/:testDateId').delete(requireAdmin, asyncHandler(
     CertifController.removeTestDate));
 
 // routes for all types of users
@@ -31,4 +32,4 @@ router.route('/:certifId/select').patch(asyncHandler(
 router.route('/:certifId/testDate').get(asyncHandler(
     CertifController.retrieveTestDatesByCertif));
 router.route('/:certifId/testDate/:testDateId/choose').patch(asyncHandler(
-    CertifController.chooseTestDateTiming));
+    CertifController.chooseTestDate));
